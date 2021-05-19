@@ -50,7 +50,12 @@ parse = (() => {
             .split(")").join("\\)")
             .split("[").join("\\[")
             .split(".").join("\\.")
+
+            // https://stackoverflow.com/a/55636681/2481350
+            // substituting multiple \s*\s* with \s*, similarly \n*\n* with \n*
             .replace(/(...)\1+/g, '$1')
+
+            // substituting multiple \s*\n*\s*\n*with \s*\n*
             .replace(/(......)\1+/g, '$1')
 
         for (var tag in tags) {
