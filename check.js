@@ -41,11 +41,12 @@ parse = (() => {
     }
 
     return (str) => {
-        str = str.split(" ").join("\\s*")
+        str = "^" + str.split(" ").join("\\s*")
             .split("\n").join("\\n*")
             .split("(").join("\\(")
             .split(")").join("\\)")
             .split("[").join("\\[")
+            .split(".").join("\\.")
             .replace(/(...)\1+/g, '$1')
 
         for (var tag in tags) {
@@ -60,20 +61,22 @@ parse = (() => {
 
 class Instruction {
     constructor(str) {
-        this._instructions = {};
+        this.instructions = {};
         this.str = str;
 
     }
 
-    instruct(regex, prompt) {
-        this._instructions[regex] = prompt;
+    add(regex, prompt) {
+        this.instructions[regex] = prompt;
     }
 
     prompt() {
-        for (var regex in this._instructions) {
-            return this.run(new RegExp(regex), this._instructions[regex])
+        for (var regex in this.instructions) {
+            var p = this.run(new RegExp(regex), this.instructions[regex])
+            if (p) return p;
         }
 
+        return null;
     }
 
     run(regex, prompt) {
@@ -81,7 +84,7 @@ class Instruction {
         let m;
 
         if ((m = regex.exec(this.str)) !== null) {
-            // The result can be accessed through the `m`-variable.
+
             m.forEach((match, groupIndex) => {
                 if (groupIndex) args.push(match)
             });
@@ -95,7 +98,8 @@ class Instruction {
 
 let instruction = new Instruction(fs.readFileSync('./palindrom.java', 'utf8'));
 
-instruction.instruct(parse(`
+
+instruction.add(parse(`
   class <class-name> {
 
     public static void main ( String <variable-name> [ ] ) {
@@ -105,9 +109,22 @@ instruction.instruct(parse(`
     }
 
   }
-`), "The class name is <%=args[0]%>, the argument variable name is <%=args[1]%>, and the variable name is <%=args[2]%>");
+`), "Thats great, let's try to import java.lang.Math package;");
+
+instruction.add(parse(`
+
+  import java.lang.Math;
+
+  class <class-name> {
+
+    public static void main ( String <variable-name> [ ] ) {
+       
+      int <variable-name> = Integer . parseInt ( <variable-name> [ 0 ] );
+        
+    }
+
+  }
+`), "You are doing great, now can you extract the no.s in reverse order?. Thats right you will need a loop");
 
 
 console.log(instruction.prompt());
-
-
