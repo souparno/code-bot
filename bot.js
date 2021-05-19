@@ -111,7 +111,6 @@ instruction.add(parse(`
 `), "console.log(\"Thats great, let's try to import java.lang.Math package;\")");
 
 
-
 instruction.add(parse(`
 
   import <import-name>;
@@ -125,7 +124,6 @@ instruction.add(parse(`
     }
 
   }
-`), "p = \"<%=args[0]%>\" == \"java.lang.Math\" ? \"You are doing great ! now can you extract the nos in reverse order ?\": \"oops! that a wrong package name\"; console.log(p)");
-
+`),`p = "<%=args[0]%>" == "java.lang.Math"? "You are doing great ! now, can you extract the no.s in reverse order ?": "oops! thats a wrong package name."; console.log(p);`) 
 prompt = instruction.prompt();
 eval(prompt)
