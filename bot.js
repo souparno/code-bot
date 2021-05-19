@@ -41,13 +41,17 @@ parse = (() => {
     }
 
     return (str) => {
-        str = "^" + str.split(" ").join("\\s*")
+
+        str = "^" + ('\n' + str)
+            .replace(/([\.\;\(\)\[\]\{\}\=\n])/g, ` $1 `)
+            .split(" ").join("\\s*")
             .split("\n").join("\\n*")
             .split("(").join("\\(")
             .split(")").join("\\)")
             .split("[").join("\\[")
             .split(".").join("\\.")
             .replace(/(...)\1+/g, '$1')
+            .replace(/(......)\1+/g, '$1')
 
         for (var tag in tags) {
             str = str.split(tag).join(tags[tag])
@@ -99,31 +103,35 @@ let instruction = new Instruction(fs.readFileSync('./palindrom.java', 'utf8'));
 
 
 instruction.add(parse(`
-  class <class-name> {
+class <class-name>{
 
-    public static void main ( String <variable-name> [ ] ) {
-       
-      int <variable-name> = Integer . parseInt ( <variable-name> [ 0 ] );
-        
-    }
+  public static void main(String <variable-name>[]){
+
+    int <variable-name> = Integer.parseInt(<variable-name>[0]);
 
   }
-`), "console.log(\"Thats great, let's try to import java.lang.Math package;\")");
+
+}
+`), `console.log("Thats great, let's try to import java.lang.Math package;")`);
 
 
 instruction.add(parse(`
+import <import-name>;
 
-  import <import-name>;
+class <class-name>{
 
-  class <class-name> {
-
-    public static void main ( String <variable-name> [ ] ) {
-       
-      int <variable-name> = Integer . parseInt ( <variable-name> [ 0 ] );
-        
-    }
+  public static void main(String <variable-name>[]){
+ 
+    int <variable-name> = Integer.parseInt(<variable-name>[0]);
 
   }
-`),`p = "<%=args[0]%>" == "java.lang.Math"? "You are doing great ! now, can you extract the no.s in reverse order ?": "oops! thats a wrong package name."; console.log(p);`) 
+
+}
+`), `
+  p = "<%=args[0]%>" == "java.lang.Math"? "You are doing great ! now, can you try and extract the no.s in reverse order ?": "oops! thats a wrong package name."; 
+  console.log(p);
+  `)
+
+
 prompt = instruction.prompt();
 eval(prompt)
