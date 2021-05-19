@@ -37,7 +37,7 @@ parse = (() => {
         "<class-name>": VARIABLE,
         "<function-name>": VARIABLE,
         "<variable-name>": VARIABLE,
-        "<import-name>": "import\s*" + VARIABLE
+        "<import-name>": VARIABLE
     }
 
     return (str) => {
@@ -53,7 +53,6 @@ parse = (() => {
             str = str.split(tag).join(tags[tag])
         }
 
-        // return new RegExp(str)
         return str;
     }
 })()
@@ -109,11 +108,13 @@ instruction.add(parse(`
     }
 
   }
-`), "Thats great, let's try to import java.lang.Math package;");
+`), "console.log(\"Thats great, let's try to import java.lang.Math package;\")");
+
+
 
 instruction.add(parse(`
 
-  import java.lang.Math;
+  import <import-name>;
 
   class <class-name> {
 
@@ -124,7 +125,7 @@ instruction.add(parse(`
     }
 
   }
-`), "You are doing great, now can you extract the no.s in reverse order?. Thats right you will need a loop");
+`), "p = \"<%=args[0]%>\" == \"java.lang.Math\" ? \"You are doing great ! now can you extract the nos in reverse order ?\": \"oops! that a wrong package name\"; console.log(p)");
 
-
-console.log(instruction.prompt());
+prompt = instruction.prompt();
+eval(prompt)
