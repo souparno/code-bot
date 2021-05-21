@@ -33,7 +33,7 @@ const fs = require('fs');
 
 transformString = (str) => {
     return str
-        .replace(/([\.\,\;\(\)\[\]\{\}\<\>\=\+])/g, ` $1 `)
+        .replace(/([.,;()[\]{}<>=+])/g, ` $1 `)
         .replace(/(\s)*/g, `$1`)
         .replace(/\n/g, ``)
 }
@@ -119,7 +119,10 @@ class Instruction {
         let args = new Array(extract.get().length);
         if ((m = regex.exec(this.str)) !== null) {
             m.forEach((match, groupIndex) => {
-                if (groupIndex) args[extract.shift()] = match;
+                if (groupIndex) {
+                    match = match.replace(/\s*([.,;()[\]{}<>=+])\s*/g, `$1`);
+                    args[extract.shift()] = match;
+                }
             });
 
             return tmpl(prompt, {
@@ -139,7 +142,7 @@ import <%=args[0]%>;
 
 class <%=args[1]%>{
 
-  public static void main(<%=args[2]%>) {
+  public static <%=args[12]%> main(<%=args[2]%>) {
 
     <%=args[11]%> a = <%=args[7]%>(<%=args[3]%>);
 
@@ -163,6 +166,7 @@ class <%=args[1]%>{
  console.log("<%=args[9]%>");
  console.log("<%=args[10]%>");
  console.log("<%=args[11]%>");
+ console.log("<%=args[12]%>");
 `);
 
 eval(instruction.prompt());

@@ -141,10 +141,10 @@ class <%=args[1]%>{
 
   public static void main(<%=args[2]%>) {
 
-    int a = Integer.parseInt(<%=args[3]%>);
+    <%=args[11]%> a = <%=args[7]%>(<%=args[3]%>);
 
-    for(<%=args[4]%>;<%=args[5]%>;<%=args[6]%>){
-      System.out.println(i);
+    <%=args[10]%>(<%=args[4]%>;<%=args[5]%>;<%=args[6]%>){
+      <%=args[8]%>(<%=args[9]%>);
     }
   }
 
@@ -158,6 +158,11 @@ class <%=args[1]%>{
  console.log("<%=args[4]%>");
  console.log("<%=args[5]%>");
  console.log("<%=args[6]%>");
+ console.log("<%=args[7]%>");
+ console.log("<%=args[8]%>");
+ console.log("<%=args[9]%>");
+ console.log("<%=args[10]%>");
+ console.log("<%=args[11]%>");
 `);
 
 prompt = instruction.prompt();
