@@ -35,6 +35,41 @@ transformString = (str) => {
     return str.replace(/\s*/g, ``)
 }
 
+
+class Extract {
+    constructor() {
+        this.arr = [];
+    }
+
+    get() {
+        return this.arr;
+    }
+
+    shift() {
+        return this.arr.shift();
+    }
+
+    set(regex, str) {
+        let m;
+        while ((m = regex.exec(str)) !== null) {
+            // This is necessary to avoid infinite loops with zero-width matches
+            if (m.index === regex.lastIndex) {
+                regex.lastIndex++;
+            }
+
+            // The result can be accessed through the `m`-variable.
+            m.forEach((match, groupIndex) => {
+                if (groupIndex) this.arr.push(match)
+            });
+        }
+
+        return str;
+    }
+}
+
+let extract = new Extract();
+
+
 parse = (str) => {
     str = transformString(str)
         .split("(").join("\\(")
@@ -43,7 +78,10 @@ parse = (str) => {
         .split("]").join("\\]")
         .split(".").join("\\.")
 
-    return "^" + str.split("<%=args%>").join("(.*)") + "$";
+    const regex = /<%=args\\\[([0-9]*)\\]%>/g;
+    const subst = `(.*)`;
+
+    return "^" + extract.set(regex, str).replace(regex, subst) + "$";
 }
 
 
@@ -54,7 +92,7 @@ class Instruction {
         this.regex = "";
     }
 
-    if(regex) {
+    if (regex) {
         this.regex = parse(regex);
 
         return this;
@@ -76,12 +114,14 @@ class Instruction {
     }
 
     run(regex, prompt) {
-        let args = [];
+
+        let args = new Array(extract.get().length);
         let m;
         if ((m = regex.exec(this.str)) !== null) {
             m.forEach((match, groupIndex) => {
-                if (groupIndex) args.push(match)
+                if (groupIndex) args[extract.shift()] = match;
             });
+
             return tmpl(prompt, {
                 args: args
             });
@@ -95,15 +135,15 @@ let instruction = new Instruction(fs.readFileSync('./palindrom.java', 'utf8'));
 
 instruction.if(`
 
-import <%=args%>;
+import <%=args[0]%>;
 
-class <%=args%>{
+class <%=args[1]%>{
 
-  public static void main(<%=args%>) {
+  public static void main(<%=args[2]%>) {
 
-    int a = Integer.parseInt(<%=args%>);
+    int a = Integer.parseInt(<%=args[3]%>);
 
-    for(<%=args%>;<%=args%>;<%=args%>){
+    for(<%=args[4]%>;<%=args[5]%>;<%=args[6]%>){
       System.out.println(i);
     }
   }
