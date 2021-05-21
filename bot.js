@@ -30,52 +30,40 @@ const fs = require('fs');
     };
 })();
 
-parse = (() => {
-    const VARIABLE = "(.*)"
 
-    const tags = {
-        "<class-name>": VARIABLE,
-        "<function-name>": VARIABLE,
-        "<variable-name>": VARIABLE,
-        "<import-name>": VARIABLE
-    }
+transformString = (str) => {
+    return str.replace(/\s*/g, ``)
+}
 
-    return (str) => {
+parse = (str) => {
+    str = transformString(str)
+        .split("(").join("\\(")
+        .split(")").join("\\)")
+        .split("[").join("\\[")
+        .split("]").join("\\]")
+        .split(".").join("\\.")
 
-        str = "^" + ('\n' + str)
-            .replace(/([\.\;\(\)\[\]\{\}\=\n])/g, ` $1 `)
-            .split(" ").join("\\s*")
-            .split("\n").join("\\n*")
-            .split("(").join("\\(")
-            .split(")").join("\\)")
-            .split("[").join("\\[")
-            .split(".").join("\\.")
-
-            // https://stackoverflow.com/a/55636681/2481350
-            // substituting multiple \s*\s* with \s*, similarly \n*\n* with \n*
-            .replace(/(...)\1+/g, '$1')
-
-            // substituting multiple \s*\n*\s*\n*with \s*\n*
-            .replace(/(......)\1+/g, '$1')
-
-        for (var tag in tags) {
-            str = str.split(tag).join(tags[tag])
-        }
-
-        return str;
-    }
-})()
+    return "^" + str.split("<%=args%>").join("(.*)") + "$";
+}
 
 
 class Instruction {
     constructor(str) {
         this.instructions = {};
-        this.str = str;
-
+        this.str = transformString(str);
+        this.regex = "";
     }
 
-    add(regex, prompt) {
-        this.instructions[regex] = prompt;
+    if(regex) {
+        this.regex = parse(regex);
+
+        return this;
+    }
+
+    then(prompt) {
+        this.instructions[this.regex] = prompt;
+
+        return this;
     }
 
     prompt() {
@@ -90,13 +78,10 @@ class Instruction {
     run(regex, prompt) {
         let args = [];
         let m;
-
         if ((m = regex.exec(this.str)) !== null) {
-
             m.forEach((match, groupIndex) => {
                 if (groupIndex) args.push(match)
             });
-
             return tmpl(prompt, {
                 args: args
             });
@@ -104,39 +89,36 @@ class Instruction {
     }
 }
 
+
 let instruction = new Instruction(fs.readFileSync('./palindrom.java', 'utf8'));
 
 
-instruction.add(parse(`
-class <class-name>{
+instruction.if(`
 
-  public static void main(String <variable-name>[]){
+import <%=args%>;
 
-    int <variable-name> = Integer.parseInt(<variable-name>[0]);
+class <%=args%>{
 
+  public static void main(<%=args%>) {
+
+    int a = Integer.parseInt(<%=args%>);
+
+    for(<%=args%>;<%=args%>;<%=args%>){
+      System.out.println(i);
+    }
   }
 
 }
-`), `console.log("Thats great, let's try to import java.lang.Math package;")`);
+`).then(`
 
-
-instruction.add(parse(`
-import <import-name>;
-
-class <class-name>{
-
-  public static void main(String <variable-name>[]){
- 
-    int <variable-name> = Integer.parseInt(<variable-name>[0]);
-
-  }
-
-}
-`), `
-  p = "<%=args[0]%>" == "java.lang.Math"? "You are doing great ! now, can you try and extract the no.s in reverse order ?": "oops! thats a wrong package name."; 
-  console.log(p);
-  `)
-
+ console.log("<%=args[0]%>");
+ console.log("<%=args[1]%>");
+ console.log("<%=args[2]%>");
+ console.log("<%=args[3]%>");
+ console.log("<%=args[4]%>");
+ console.log("<%=args[5]%>");
+ console.log("<%=args[6]%>");
+`);
 
 prompt = instruction.prompt();
 eval(prompt)
