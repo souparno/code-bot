@@ -120,7 +120,7 @@ class Instruction {
         if ((m = regex.exec(this.str)) !== null) {
             m.forEach((match, groupIndex) => {
                 if (groupIndex) {
-                    match = match.replace(/\s*([.,;()[\]{}<>=+])\s*/g, `$1`);
+                    match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
                     args[extract.shift()] = match;
                 }
             });
@@ -153,7 +153,6 @@ class Palindrome{
 }
 
 `);
-
 
 instruction.if(`
 
