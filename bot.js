@@ -30,15 +30,6 @@ const fs = require('fs');
     };
 })();
 
-
-transform = (str) => {
-    return str
-        .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
-        .replace(/(\s)*/g, `$1`)
-        .replace(/\n/g, ``)
-}
-
-
 class Extract {
     constructor() {
         this.arr = [];
@@ -70,6 +61,14 @@ class Extract {
     }
 }
 
+transform = (str) => {
+    return str
+        .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
+        .replace(/(\s)*/g, `$1`)
+        .replace(/\n/g, ``)
+        .trim()
+}
+
 parse = (str, extract) => {
     str = transform(str)
         .split("(").join("\\(")
@@ -96,9 +95,10 @@ class Instruction {
     }
 
     then(prompt) {
-        this.extract = new Extract();
-        this.regex = parse(this.regex, this.extract);
-        this.instructions[this.regex] = prompt;
+        let extract = new Extract();
+
+        this.regex = parse(this.regex, extract);
+        this.instructions[this.regex] = [extract, prompt];
 
         return this;
     }
@@ -106,22 +106,22 @@ class Instruction {
     prompt(str) {
         this.str = transform(str);
         for (var regex in this.instructions) {
-            var p = this.run(new RegExp(regex), this.instructions[regex])
+            var p = this.run(new RegExp(regex), this.instructions[regex][1], this.instructions[regex][0])
             if (p) return p;
         }
 
         return null;
     }
 
-    run(regex, prompt) {
+    run(regex, prompt, extract) {
         let m;
-        let args = new Array(this.extract.get().length);
+        let args = new Array(extract.get().length);
         if ((m = regex.exec(this.str)) !== null) {
             m.forEach((match, groupIndex) => {
                 if (groupIndex) {
                     match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
 
-                    args[this.extract.shift()] = match;
+                    args[extract.shift()] = match;
                 }
             });
 
