@@ -33,7 +33,7 @@ const fs = require('fs');
 
 transformString = (str) => {
     return str
-        .replace(/([.,;()[\]{}<>=+])/g, ` $1 `)
+    .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
         .replace(/(\s)*/g, `$1`)
         .replace(/\n/g, ``)
 }
