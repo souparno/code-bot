@@ -31,7 +31,7 @@ const fs = require('fs');
 })();
 
 
-transformString = (str) => {
+transform = (str) => {
     return str
     .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
         .replace(/(\s)*/g, `$1`)
@@ -73,7 +73,7 @@ class Extract {
 let extract = new Extract();
 
 parse = (str) => {
-    str = transformString(str)
+    str = transform(str)
         .split("(").join("\\(")
         .split(")").join("\\)")
         .split("[").join("\\[")
@@ -89,7 +89,7 @@ parse = (str) => {
 class Instruction {
     constructor(str) {
         this.instructions = {};
-        this.str = transformString(str);
+        this.str = transform(str);
         this.regex = "";
     }
 
