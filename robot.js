@@ -80,11 +80,12 @@ parse = (str) => {
         .split("]").join("\\]")
         .split(".").join("\\.")
 
-    const regex = /<\s%\s=\sargs\s\\\[\s([0-9]*)\s\\]\s%\s>/g;;
-    const subst = `(.*)`;
-    return "^" + extract.set(regex, str).replace(regex, subst) + "$";
-}
+    let regex = ["<\\s%\\s=\\sarg", "\\s\\\\\\[\\s([0-9]*)\\s\\\\]\\s%\\s>"]
 
+    return ("^" + extract.set(new RegExp(regex.join("."), "g"), str) + "$")
+        .replace(new RegExp(regex.join("s"), "g"), `(.*)`)
+        .replace(new RegExp(regex.join("v"), "g"), `([^\\s]*)`);
+}
 
 class Instruction {
     constructor(str) {
@@ -142,7 +143,7 @@ import <%=args[0]%>;
 
 class <%=args[1]%>{
 
-  public static <%=args[12]%> main(<%=args[2]%>) {
+  <%=argv[13]%> <%=argv[14]%> <%=args[12]%> main(<%=args[2]%>) {
 
     <%=args[11]%> a = <%=args[7]%>(<%=args[3]%>);
 
@@ -167,6 +168,8 @@ class <%=args[1]%>{
  console.log("<%=args[10]%>");
  console.log("<%=args[11]%>");
  console.log("<%=args[12]%>");
+ console.log("<%=args[13]%>");
+ console.log("<%=args[14]%>");
 `);
 
 eval(instruction.prompt());
