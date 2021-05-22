@@ -1,7 +1,7 @@
 let instruction = require("../bot")
 
 
-instruction.if(`
+instruction.if([`
 
 import <%=args[0]%>;
 
@@ -17,7 +17,7 @@ class <%=args[1]%>{
   }
 
 }
-`).then(`
+`]).then(`
 
  console.log("<%=args[0]%>");
  console.log("<%=args[1]%>");

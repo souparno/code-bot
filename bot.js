@@ -95,16 +95,19 @@ class Instruction {
     }
 
     then(prompt) {
-        let extract = new Extract();
+        for (var index in this.regex) {
+            let extract = new Extract();
+            let regex = parse(this.regex[index], extract);
 
-        this.regex = parse(this.regex, extract);
-        this.instructions[this.regex] = [extract, prompt];
+            this.instructions[regex] = [extract, prompt];
+        }
 
         return this;
     }
 
     prompt(str) {
         this.str = transform(str);
+
         for (var regex in this.instructions) {
             var p = this.run(new RegExp(regex), this.instructions[regex][1], this.instructions[regex][0])
             if (p) return p;
@@ -131,6 +134,5 @@ class Instruction {
         }
     }
 }
-
 
 module.exports = new Instruction();

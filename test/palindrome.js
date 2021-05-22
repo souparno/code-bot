@@ -1,38 +1,38 @@
 
 let instruction = require("../bot")
 
-// instruction.if(``).then(`
+instruction.if([``]).then(`
 
-//   console.log("Let's start off with creating a class"); 
-// `);
+  console.log("Let's start off with creating a class"); 
+`);
 
 
-// instruction.if(`
+instruction.if([`
 
-// class <%=args[0]%>{
+class <%=args[0]%>{
   
-// }
+}
 
-// `).then(`
+`]).then(`
 
-// var classname = "<%=args[0]%>";
+var classname = "<%=args[0]%>";
 
-// if(classname) console.log("That's Great you declared a class called " + classname);
+if(classname) console.log("That's Great you declared a class called " + classname);
 
-// if(classname && classname != "Palindrome") console.log("Can you now name your class as Palindrome ?");
+if(classname && classname != "Palindrome") console.log("Can you now name your class as Palindrome ?");
 
-// if(classname && classname == "Palindrome") console.log("lets now create a public non-returntype method called main");
-// `);
+if(classname && classname == "Palindrome") console.log("lets now create a public non-returntype method called main");
+`);
 
 
-instruction.if(`
+instruction.if([`
 
 class <%=args[0]%>{
       <%=args[1]%> (){
    
   }
  }
-`).then(`
+`]).then(`
 
   if("<%=args[1]%>" == "public static void main"){
     console.log("what! you did that! awesome, now lets try to create a array type string parameter for the main method");
@@ -44,25 +44,33 @@ class <%=args[0]%>{
 
 `)
 
-instruction.if(`
-  class Palindrome{
+instruction.if([`
+  class <%=args[0]%>{
 
-  public static void main(<%=args[0]%>){
+  public static void main(String <%=args[1]%>[]){
     
   }
 
  }
 
-`).then(`
-console.log("I am here");
-   console.log("<%=args[0]%>");
+`,`
+  class <%=args[0]%>{
+
+  public static void main(String[] <%=args[1]%>){
+    
+  }
+
+ }
+
+`]).then(`
+  console.log("<%=args[1]%>");
 `)
 
 
 let prompt = instruction.prompt(`
 
 class Palindrome{
- public static void main(){
+ public static void main(String[] args){
    
  } 
 }
