@@ -133,7 +133,26 @@ class Instruction {
 }
 
 
-let instruction = new Instruction(fs.readFileSync('./palindrom.java', 'utf8'));
+let instruction = new Instruction(`
+
+
+import java.io.*;
+
+class Palindrome{
+
+  public static void main(String args[]) {
+
+    int a = Integer.parseInt(args[0], b, c);
+
+    for(int i =0;i<=10; i++){
+      System.out.println(i);
+    }
+  }
+
+
+}
+
+`);
 
 
 instruction.if(`
