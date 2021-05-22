@@ -32,7 +32,10 @@ const fs = require('fs');
 
 
 transformString = (str) => {
-    return str.replace(/\s*/g, ``)
+    return str
+        .replace(/([.,;()[\]{}<>=+])/g, ` $1 `)
+        .replace(/(\s)*/g, `$1`)
+        .replace(/\n/g, ``)
 }
 
 
@@ -69,7 +72,6 @@ class Extract {
 
 let extract = new Extract();
 
-
 parse = (str) => {
     str = transformString(str)
         .split("(").join("\\(")
@@ -78,12 +80,12 @@ parse = (str) => {
         .split("]").join("\\]")
         .split(".").join("\\.")
 
-    const regex = /<%=args\\\[([0-9]*)\\]%>/g;
-    const subst = `(.*)`;
+    let regex = ["<\\s%\\s=\\sarg", "\\s\\\\\\[\\s([0-9]*)\\s\\\\]\\s%\\s>"]
 
-    return "^" + extract.set(regex, str).replace(regex, subst) + "$";
+    return ("^" + extract.set(new RegExp(regex.join("."), "g"), str) + "$")
+        .replace(new RegExp(regex.join("s"), "g"), `(.*)`)
+        .replace(new RegExp(regex.join("v"), "g"), `([^\\s]*)`);
 }
-
 
 class Instruction {
     constructor(str) {
@@ -114,12 +116,14 @@ class Instruction {
     }
 
     run(regex, prompt) {
-
-        let args = new Array(extract.get().length);
         let m;
+        let args = new Array(extract.get().length);
         if ((m = regex.exec(this.str)) !== null) {
             m.forEach((match, groupIndex) => {
-                if (groupIndex) args[extract.shift()] = match;
+                if (groupIndex) {
+                    match = match.replace(/\s*([.,;()[\]{}<>=+])\s*/g, `$1`);
+                    args[extract.shift()] = match;
+                }
             });
 
             return tmpl(prompt, {
@@ -139,7 +143,7 @@ import <%=args[0]%>;
 
 class <%=args[1]%>{
 
-  public static void main(<%=args[2]%>) {
+  <%=argv[13]%> <%=argv[14]%> <%=args[12]%> main(<%=args[2]%>) {
 
     <%=args[11]%> a = <%=args[7]%>(<%=args[3]%>);
 
@@ -163,7 +167,9 @@ class <%=args[1]%>{
  console.log("<%=args[9]%>");
  console.log("<%=args[10]%>");
  console.log("<%=args[11]%>");
+ console.log("<%=args[12]%>");
+ console.log("<%=args[13]%>");
+ console.log("<%=args[14]%>");
 `);
 
-prompt = instruction.prompt();
-eval(prompt)
+eval(instruction.prompt());
