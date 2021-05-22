@@ -33,7 +33,7 @@ const fs = require('fs');
 
 transform = (str) => {
     return str
-    .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
+        .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
         .replace(/(\s)*/g, `$1`)
         .replace(/\n/g, ``)
 }
@@ -114,7 +114,7 @@ class Instruction {
         return null;
     }
 
-  run(regex, prompt) {
+    run(regex, prompt) {
         let m;
         let args = new Array(extract.get().length);
         if ((m = regex.exec(this.str)) !== null) {
