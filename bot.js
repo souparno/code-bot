@@ -80,11 +80,10 @@ parse = (str) => {
         .split("]").join("\\]")
         .split(".").join("\\.")
 
-    let regex = ["<\\s%\\s=\\sarg", "\\s\\\\\\[\\s([0-9]*)\\s\\\\]\\s%\\s>"]
+    let regex = /<\s%\s=\sargs\s\\\[\s([0-9]*)\s\\]\s%\s>/g;
 
-    return ("^" + extract.set(new RegExp(regex.join("."), "g"), str) + "$")
-        .replace(new RegExp(regex.join("s"), "g"), `(.*)`)
-        .replace(new RegExp(regex.join("v"), "g"), `([^\\s]*)`);
+    return ("^" + extract.set(regex, str) + "$")
+        .replace(regex, `(.*)`);
 }
 
 class Instruction {
@@ -115,7 +114,7 @@ class Instruction {
         return null;
     }
 
-    run(regex, prompt) {
+  run(regex, prompt) {
         let m;
         let args = new Array(extract.get().length);
         if ((m = regex.exec(this.str)) !== null) {
@@ -143,9 +142,9 @@ import <%=args[0]%>;
 
 class <%=args[1]%>{
 
-  <%=argv[13]%> <%=argv[14]%> <%=args[12]%> main(<%=args[2]%>) {
+  <%=args[13]%> <%=args[14]%> <%=args[12]%> main(<%=args[2]%>) {
 
-    <%=args[11]%> a = <%=args[7]%>(<%=args[3]%>);
+    <%=args[11]%> <%=args[15]%> = <%=args[7]%>(<%=args[3]%>);
 
     <%=args[10]%>(<%=args[4]%>;<%=args[5]%>;<%=args[6]%>){
       <%=args[8]%>(<%=args[9]%>);
@@ -170,6 +169,7 @@ class <%=args[1]%>{
  console.log("<%=args[12]%>");
  console.log("<%=args[13]%>");
  console.log("<%=args[14]%>");
+ console.log("<%=args[15]%>");
 `);
 
 eval(instruction.prompt());
