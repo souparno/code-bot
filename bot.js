@@ -87,9 +87,8 @@ parse = (str) => {
 }
 
 class Instruction {
-    constructor(str) {
+    constructor() {
         this.instructions = {};
-        this.str = transform(str);
         this.regex = "";
     }
 
@@ -105,7 +104,8 @@ class Instruction {
         return this;
     }
 
-    prompt() {
+    prompt(str) {
+        this.str = transform(str);
         for (var regex in this.instructions) {
             var p = this.run(new RegExp(regex), this.instructions[regex])
             if (p) return p;
@@ -133,26 +133,7 @@ class Instruction {
 }
 
 
-let instruction = new Instruction(`
-
-
-import java.io.*;
-
-class Palindrome{
-
-  public static void main(String args[]) {
-
-    int a = Integer.parseInt(args[0], b, c);
-
-    for(int i =0;i<=10; i++){
-      System.out.println(i);
-    }
-  }
-
-
-}
-
-`);
+let instruction = new Instruction();
 
 instruction.if(`
 
@@ -190,4 +171,25 @@ class <%=args[1]%>{
  console.log("<%=args[15]%>");
 `);
 
-eval(instruction.prompt());
+
+let prompt = instruction.prompt(`
+
+import java.io.*;
+
+class Palindrome{
+
+  public static void main(String args[]) {
+
+    int a = Integer.parseInt(args[0], b, c);
+
+    for(int i =0;i<=10; i++){
+      System.out.println(i);
+    }
+  }
+
+
+}
+
+`)
+
+eval(prompt);
