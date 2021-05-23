@@ -52,7 +52,6 @@ instruction.if([`
   }
 
  }
-
 `,`
   class <%=args[0]%>{
 
@@ -61,6 +60,15 @@ instruction.if([`
   }
 
  }
+`,
+`  class <%=args[0]%>{
+
+  public static void main(String []<%=args[1]%>){
+    
+  }
+
+ }
+
 
 `]).then(`
   console.log("<%=args[1]%>");
@@ -70,7 +78,7 @@ instruction.if([`
 let prompt = instruction.prompt(`
 
 class Palindrome{
- public static void main(String[] args){
+ public static void main(String []args){
    
  } 
 }

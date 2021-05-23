@@ -32,55 +32,56 @@ const fs = require('fs');
 
 class Extract {
     constructor() {
-        this.arr = [];
+        this.variables = [];
     }
 
     get() {
-        return this.arr;
+        return this.variables.shift();
     }
 
-    shift() {
-        return this.arr.shift();
-    }
-
-    set(regex, str) {
-        let m;
-        while ((m = regex.exec(str)) !== null) {
-            // This is necessary to avoid infinite loops with zero-width matches
-            if (m.index === regex.lastIndex) {
-                regex.lastIndex++;
-            }
-
-            // The result can be accessed through the `m`-variable.
-            m.forEach((match, groupIndex) => {
-                if (groupIndex) this.arr.push(match)
-            });
-        }
-
-        return str;
+    set(name) {
+        this.variables.push(name);
     }
 }
 
-transform = (str) => {
+format = (str) => {
     return str
         .replace(/([.,;()[\]{}<>=+\/!%*-])/g, ` $1 `)
+        .replace(/\n/g, ` `)
         .replace(/(\s)*/g, `$1`)
-        .replace(/\n/g, ``)
         .trim()
 }
 
 parse = (str, extract) => {
-    str = transform(str)
+    str = format(str)
         .split("(").join("\\(")
         .split(")").join("\\)")
         .split("[").join("\\[")
         .split("]").join("\\]")
         .split(".").join("\\.")
 
-    let regex = /<\s%\s=\sargs\s\\\[\s([0-9]*)\s\\]\s%\s>/g;
+    for (var key in (str = str.split("% >"))) {
+        let m;
 
-    return ("^" + extract.set(regex, str) + "$")
-        .replace(regex, `(.*)`);
+        if ((m = /< % =(.*)/g.exec(str[key]))) extract.set(m[1].trim());
+
+        str[key] = str[key].replace(/< % =.*/g, `(.*)`);
+    }
+
+    return "^" + str.join('') + "$";
+}
+
+
+dataObj = (obj, key, val) => {
+    let m;
+    if ((m = /(.*)\s\\\[\s(.*)\s\\\]/g.exec(key)) !== null) {
+        if (!obj[m[1]]) obj[m[1]] = new Array()
+        obj[m[1]][m[2]] = val;
+
+        return;
+    }
+
+    obj[key] = val;
 }
 
 class Instruction {
@@ -106,7 +107,7 @@ class Instruction {
     }
 
     prompt(str) {
-        this.str = transform(str);
+        this.str = format(str);
 
         for (var regex in this.instructions) {
             var p = this.run(new RegExp(regex), this.instructions[regex][1], this.instructions[regex][0])
@@ -118,19 +119,18 @@ class Instruction {
 
     run(regex, prompt, extract) {
         let m;
-        let args = new Array(extract.get().length);
+        let obj = {};
+
         if ((m = regex.exec(this.str)) !== null) {
             m.forEach((match, groupIndex) => {
                 if (groupIndex) {
                     match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
 
-                    args[extract.shift()] = match;
+                    dataObj(obj, extract.get(), match);
                 }
             });
 
-            return tmpl(prompt, {
-                args: args
-            });
+            return tmpl(prompt, obj);
         }
     }
 }
