@@ -30,7 +30,7 @@ const fs = require('fs');
     };
 })();
 
-class Extract {
+class Variables {
     constructor() {
         this.variables = [];
     }
@@ -52,7 +52,7 @@ format = (str) => {
         .trim()
 }
 
-parse = (str, extract) => {
+parse = (str, variables) => {
     str = format(str)
         .split("(").join("\\(")
         .split(")").join("\\)")
@@ -63,14 +63,13 @@ parse = (str, extract) => {
     for (var key in (str = str.split("% >"))) {
         let m;
 
-        if ((m = /< % =(.*)/g.exec(str[key]))) extract.set(m[1].trim());
+        if ((m = /< % =(.*)/g.exec(str[key]))) variables.set(m[1].trim());
 
         str[key] = str[key].replace(/< % =.*/g, `(.*)`);
     }
 
-    return "^" + str.join('') + "$";
+    return new RegExp("^" + str.join('') + "$");
 }
-
 
 dataObj = (obj, key, val) => {
     let m;
@@ -86,7 +85,7 @@ dataObj = (obj, key, val) => {
 
 class Instruction {
     constructor() {
-        this.instructions = {};
+        this.instructions = [];
     }
 
     if (regex) {
@@ -97,40 +96,48 @@ class Instruction {
 
     then(prompt) {
         for (var index in this.regex) {
-            let extract = new Extract();
-            let regex = parse(this.regex[index], extract);
+            let variables = new Variables();
+            let regex = parse(this.regex[index], variables);
 
-            this.instructions[regex] = [extract, prompt];
+            this.instructions.push({
+                regex: regex,
+                variables: variables,
+                prompt: prompt
+            });
         }
 
         return this;
     }
 
     prompt(str) {
-        this.str = format(str);
+        for (var key in this.instructions) {
+            var p = this.run({
+                str: format(str),
+                regex:  this.instructions[key].regex,
+                prompt:  this.instructions[key].prompt,
+                variables:  this.instructions[key].variables
+            })
 
-        for (var regex in this.instructions) {
-            var p = this.run(new RegExp(regex), this.instructions[regex][1], this.instructions[regex][0])
             if (p) return p;
         }
 
         return null;
     }
 
-    run(regex, prompt, extract) {
+    run(data) {
         let m;
         let obj = {};
 
-        if ((m = regex.exec(this.str)) !== null) {
+        if ((m = data.regex.exec(data.str)) !== null) {
             m.forEach((match, groupIndex) => {
                 if (groupIndex) {
                     match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
 
-                    dataObj(obj, extract.get(), match);
+                    dataObj(obj, data.variables.get(), match);
                 }
             });
 
-            return tmpl(prompt, obj);
+            return tmpl(data.prompt, obj);
         }
     }
 }
