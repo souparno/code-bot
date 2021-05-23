@@ -97,10 +97,9 @@ class Instruction {
     then(prompt) {
         for (var index in this.regex) {
             let variables = new Variables();
-            let regex = parse(this.regex[index], variables);
 
             this.instructions.push({
-                regex: regex,
+                regex: parse(this.regex[index], variables),
                 variables: variables,
                 prompt: prompt
             });
