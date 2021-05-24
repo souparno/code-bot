@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 tmpl = (str, data) => {
-    var fn = "(function (obj){var p=[];with(obj){p.push('" +
+    let fn = "(function (obj){var p=[];with(obj){p.push('" +
         str
         .replace(/[\r\t\n]/g, " ")
         .replace(/'/g, "\\'")
@@ -9,20 +9,6 @@ tmpl = (str, data) => {
         "');}return p.join('');})";
 
     return eval(fn)(data);
-}
-
-class Variables {
-    constructor() {
-        this.names = [];
-    }
-
-    get() {
-        return this.names.shift();
-    }
-
-    set(name) {
-        this.names.push(name);
-    }
 }
 
 format = (str) => {
@@ -77,6 +63,20 @@ extract = (str, regex, variables) => {
         });
 
         return variables;
+    }
+}
+
+class Variables {
+    constructor() {
+        this.names = [];
+    }
+
+    get() {
+        return this.names.shift();
+    }
+
+    set(name) {
+        this.names.push(name);
     }
 }
 
