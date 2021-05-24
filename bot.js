@@ -85,18 +85,17 @@ dataObj = (obj, key, val) => {
 
 extract = (str, regex, variables) => {
     let m;
-    let obj = {};
 
     if ((m = regex.exec(str)) !== null) {
         m.forEach((match, groupIndex) => {
             if (groupIndex) {
                 match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
 
-                dataObj(obj, variables.get(), match);
+                dataObj(variables, variables.get(), match);
             }
         });
 
-        return obj;
+        return variables;
     }
 }
 
