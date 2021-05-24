@@ -32,15 +32,15 @@ const fs = require('fs');
 
 class Variables {
     constructor() {
-        this.variables = [];
+        this.names = [];
     }
 
     get() {
-        return this.variables.shift();
+        return this.names.shift();
     }
 
     set(name) {
-        this.variables.push(name);
+        this.names.push(name);
     }
 }
 
