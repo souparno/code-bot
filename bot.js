@@ -83,6 +83,23 @@ dataObj = (obj, key, val) => {
     obj[key] = val;
 }
 
+extract = (str, regex, variables) => {
+    let m;
+    let obj = {};
+
+    if ((m = regex.exec(str)) !== null) {
+        m.forEach((match, groupIndex) => {
+            if (groupIndex) {
+                match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
+
+                dataObj(obj, variables.get(), match);
+            }
+        });
+
+        return obj;
+    }
+}
+
 class Instruction {
     constructor() {
         this.instructions = [];
@@ -110,33 +127,10 @@ class Instruction {
 
     prompt(str) {
         for (var key in this.instructions) {
-            var p = this.run({
-                str: format(str),
-                regex:  this.instructions[key].regex,
-                prompt:  this.instructions[key].prompt,
-                variables:  this.instructions[key].variables
-            })
+            let instruction = this.instructions[key];
+            let obj = extract(format(str), instruction.regex, instruction.variables)
 
-            if (p) return p;
-        }
-
-        return null;
-    }
-
-    run(data) {
-        let m;
-        let obj = {};
-
-        if ((m = data.regex.exec(data.str)) !== null) {
-            m.forEach((match, groupIndex) => {
-                if (groupIndex) {
-                    match = match.replace(/\s*([.,;()[\]{}<>=+\/!%*-])\s*/g, `$1`);
-
-                    dataObj(obj, data.variables.get(), match);
-                }
-            });
-
-            return tmpl(data.prompt, obj);
+            if (obj) return tmpl(instruction.prompt, obj);
         }
     }
 }
