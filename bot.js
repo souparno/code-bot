@@ -53,7 +53,7 @@ format = (str) => {
 }
 
 parse = (str, variables) => {
-    str = format(str)
+    str = str
         .split("(").join("\\(")
         .split(")").join("\\)")
         .split("[").join("\\[")
@@ -99,7 +99,7 @@ class Instruction {
             let variables = new Variables();
 
             this.instructions.push({
-                regex: parse(this.regex[index], variables),
+                regex: parse(format(this.regex[index]), variables),
                 variables: variables,
                 prompt: prompt
             });
