@@ -20,6 +20,8 @@ format = (str) => {
 }
 
 parse = (str, variables) => {
+    let regex = /<\s%\s=\s(.*?)\s%\s>/g;
+
     str = str
         .split("(").join("\\(")
         .split(")").join("\\)")
@@ -27,15 +29,19 @@ parse = (str, variables) => {
         .split("]").join("\\]")
         .split(".").join("\\.")
 
-    for (var key in (str = str.split("% >"))) {
-        let m;
+    while ((m = regex.exec(str)) !== null) {
+        // This is necessary to avoid infinite loops with zero-width matches
+        if (m.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
 
-        if ((m = /< % =(.*)/g.exec(str[key]))) variables.set(m[1].trim());
-
-        str[key] = str[key].replace(/< % =.*/g, `(.*)`);
+        // The result can be accessed through the `m`-variable.
+        m.forEach((match, groupIndex) => {
+            if (groupIndex) variables.set(match);
+        });
     }
 
-    return new RegExp("^" + str.join('') + "$");
+    return new RegExp("^" + str.replace(regex, '(.*)') + "$");
 }
 
 dataObj = (obj, key, val) => {
