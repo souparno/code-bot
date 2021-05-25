@@ -46,6 +46,7 @@ parse = (str, variables) => {
 
 dataObj = (obj, key, val) => {
     let m;
+
     if ((m = /(.*)\s\\\[\s(.*)\s\\\]/g.exec(key)) !== null) {
         if (!obj[m[1]]) obj[m[1]] = new Array()
         obj[m[1]][m[2]] = val;
